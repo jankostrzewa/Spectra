@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Spectra</string>
+    <string name="takePhoto">Take an image</string>
+    <string name="preview_photo">Preview photo</string>
+    <string name="imageAnalysis">Analyze an image</string>
+    <string name="calibrate">Calibrate program</string>
+    <string name="capture_spectrum">Capture spectrum</string>
+    <string name="previous_results">Previous results</string>
+    <string name="app_configuration">App configuration</string>
+</resources>
