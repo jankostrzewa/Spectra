@@ -21,14 +21,17 @@ public final class Config {
     boolean ImageLoaded = false;
     boolean HasCamera = false;
     boolean IsCalibrated = false;
-    int SCREENWIDTH;
-    int SCREENHEIGHT;
+    int SCREENWIDTH = 0;
+    int SCREENHEIGHT = 0;
     obsoleteDatapoint minimalWavelength;
     obsoleteDatapoint maximumWavelength;
     boolean CALIBRATING;
     String filePath = "";
 
+    private void readSettingsFromFile() {
 
+
+    }
 
 
 
