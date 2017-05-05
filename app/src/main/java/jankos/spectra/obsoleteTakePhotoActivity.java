@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class obsoleteTakePhotoActivity extends AppCompatActivity {
 
@@ -91,7 +92,7 @@ public class obsoleteTakePhotoActivity extends AppCompatActivity {
 
     private File createImageFile() throws IOException {//a function to save the resulted file to storage
         //created image must have a unique, non collision filename e.g. with a timestamp
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).format(new Date());
         String imageFileName = "IMG_".concat(timeStamp); //name of taken photo to be saved
         File storageDirectory = Environment.getExternalStorageDirectory();//get location of storage
 

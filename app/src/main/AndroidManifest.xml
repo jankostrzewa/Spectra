@@ -21,12 +21,9 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
         <activity android:name=".obsoleteTakePhotoActivity" />
         <activity android:name=".ImageAnalysis" />
         <activity android:name=".CalibrationActivity" />
@@ -34,7 +31,4 @@
         <activity android:name=".PreviousResultsActivity" />
         <activity android:name=".AppConfigActivity" />
     </application>
-
-
-
 </manifest>

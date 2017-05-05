@@ -9,34 +9,27 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 
-public class ImageAnalysis extends AppCompatActivity {
+public class ImageAnalysis{
 
     private double[] columnValues;
-    private Config config = Config.GetInstance();
+    private Config config;
     String mImageFileLocation;
+    private static ImageAnalysis imageAnalysis;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_analyze_image);
-        try {
-            config();
-        }
-        catch (Exception ex){//If config not loaded, restart the image loading activities
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            Toast.makeText(this,ex.getMessage(),Toast.LENGTH_LONG).show();
-        }
-        if(config.IsCalibrated)
-            analyzeImage(mImageFileLocation);
+    private ImageAnalysis() {
+        config = Config.GetInstance();
     }
 
-    private void analyzeImage(String filePath){
-        if(filePath != null){
+    public static ImageAnalysis ImageAnalysisFactory(){
+        if(imageAnalysis == null)
+            imageAnalysis = new ImageAnalysis();
+        return imageAnalysis;
+    }
 
-            Bitmap capturedPhotoBitmap = BitmapFactory.decodeFile(filePath);
-            double[] values = sumImageToColumns(capturedPhotoBitmap);
-
+    public void analyzeImage(Bitmap bitmap){
+        if(bitmap != null){
+            double[] values = sumImageToColumns(bitmap);
+            System.out.print(values);
         }
         else{
 
@@ -56,11 +49,11 @@ public class ImageAnalysis extends AppCompatActivity {
     }
 
     private double[] sumImageToColumns(Bitmap bitmap){
-        double[] summedColumns = null;
-        double spectrumWidth = config.maximumWavelength.wavelength - config.minimalWavelength.wavelength;
-        double resolution = spectrumWidth; //
+    //    double spectrumWidth = config.maximumWavelength.wavelength - config.minimalWavelength.wavelength;
+    //    double resolution = spectrumWidth; //
         int x=bitmap.getWidth();
         int y=bitmap.getHeight();
+        double[] summedColumns = new double[x];
         int ySumMin=y/2-50;//Minimum y in range
         for(int i=0;i<x;i++){//Iterate through each column
             double pixelValueColumn = 0;//Initialize sum of each column

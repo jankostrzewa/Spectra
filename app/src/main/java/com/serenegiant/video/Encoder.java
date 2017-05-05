@@ -23,15 +23,15 @@
 
 package com.serenegiant.video;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.util.Log;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 public abstract class Encoder implements Runnable {
 	private static final boolean DEBUG = true;	// TODO set false on release

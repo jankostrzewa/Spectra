@@ -21,4 +21,6 @@
   ~  may have a different license, see the respective files.
   -->
 
-<resources></resources>
+<resources>
+	<string name="app_name">encoder</string>
+</resources>

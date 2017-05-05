@@ -1,5 +1,13 @@
 package jankos.spectra;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
@@ -7,11 +15,14 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
-import android.view.TextureView;
+import android.view.TextureView.SurfaceTextureListener;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -25,11 +36,6 @@ import com.serenegiant.video.Encoder;
 import com.serenegiant.video.Encoder.EncodeListener;
 import com.serenegiant.video.SurfaceEncoder;
 import com.serenegiant.widget.SimpleUVCCameraTextureView;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.GregorianCalendar;
-import java.util.Locale;
 
 
 public final class CaptureUsbActivity extends BaseActivity implements CameraDialog.CameraDialogParent  {
@@ -52,26 +58,34 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
 
     private int mCaptureState = 0;
     private Surface mPreviewSurface;
-    private Encoder mEncoder;
 
+    private ImageView mImageViewCapture;
+    private ImageView mImageViewSpectrum;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_capture);
+        setContentView(R.layout.activity_capture); // ensure the correct view is assigned!!
 
-        mCameraButton = (ToggleButton)findViewById(R.id.camera_button);
-        mCameraButton.setOnCheckedChangeListener(mOnCheckedChangeListener);
+        mCaptureButton = (ImageButton)findViewById(R.id.capture_button);
+        mCaptureButton.setOnClickListener(mOnClickListener);
 
         mUVCCameraView = (SimpleUVCCameraTextureView)findViewById(R.id.UVCCameraTextureView1);
         mUVCCameraView.setAspectRatio(UVCCamera.DEFAULT_PREVIEW_WIDTH / (float)UVCCamera.DEFAULT_PREVIEW_HEIGHT);
         mUVCCameraView.setSurfaceTextureListener(mSurfaceTextureListener);
 
-        mCaptureButton = (ImageButton)findViewById(R.id.capture_button);
-        mCaptureButton.setOnClickListener(mOnClickListener);
-
         mUSBMonitor = new USBMonitor(this, mOnDeviceConnectListener);
+
+        mCameraButton = (ToggleButton)findViewById(R.id.camera_button);
+        mCameraButton.setOnCheckedChangeListener(mOnCheckedChangeListener);
+
+        mImageViewCapture = (ImageView)findViewById(R.id.imageViewCapture);
+        mImageViewCapture.setImageResource(R.drawable.example_small);
+
+        mImageViewSpectrum = (ImageView)findViewById(R.id.imageViewSpectrum);
+        mImageViewSpectrum.setImageResource(R.drawable.sunspd);
+        ImageAnalysis.ImageAnalysisFactory().analyzeImage(BitmapFactory.decodeResource(getResources(),R.drawable.example_small));
     }
 
     @Override
@@ -88,36 +102,38 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         updateItems();
     }
 
-    private void setCameraButton(final boolean isOn) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mCameraButton != null) {
-                    try {
-                        mCameraButton.setOnCheckedChangeListener(null);
-                        mCameraButton.setChecked(isOn);
-                    } finally {
-                        mCameraButton.setOnCheckedChangeListener(mOnCheckedChangeListener);
-                    }
-                }
-                if (!isOn && (mCaptureButton != null)) {
-                    mCaptureButton.setVisibility(View.INVISIBLE);
-                }
+    @Override
+    protected void onStop() {
+        synchronized (mSync) {
+            if (mUVCCamera != null) {
+                stopCapture();
+                mUVCCamera.stopPreview();
             }
-        }, 0);
+            mUSBMonitor.unregister();
+        }
+        setCameraButton(false);
+        super.onStop();
     }
 
-    private void updateItems() {
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mCaptureButton.setVisibility(mCameraButton.isChecked() ? View.VISIBLE : View.INVISIBLE);
-                mCaptureButton.setColorFilter(mCaptureState == CAPTURE_STOP ? 0 : 0xffff0000);
+    @Override
+    public void onDestroy() {
+        synchronized (mSync) {
+            if (mUVCCamera != null) {
+                mUVCCamera.destroy();
+                mUVCCamera = null;
             }
-        });
+            if (mUSBMonitor != null) {
+                mUSBMonitor.destroy();
+                mUSBMonitor = null;
+            }
+        }
+        mCameraButton = null;
+        mCaptureButton = null;
+        mUVCCameraView = null;
+        super.onDestroy();
     }
 
-    private final CompoundButton.OnCheckedChangeListener mOnCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+    private final OnCheckedChangeListener mOnCheckedChangeListener = new OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
             synchronized (mSync) {
@@ -132,7 +148,7 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         }
     };
 
-    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
+    private final OnClickListener mOnClickListener = new OnClickListener() {
         @Override
         public void onClick(final View v) {
             if (checkPermissionWriteExternalStorage()) {
@@ -144,138 +160,6 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
             }
         }
     };
-    private final TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
-
-        @Override
-        public void onSurfaceTextureAvailable(final SurfaceTexture surface, final int width, final int height) {
-        }
-
-        @Override
-        public void onSurfaceTextureSizeChanged(final SurfaceTexture surface, final int width, final int height) {
-        }
-
-        @Override
-        public boolean onSurfaceTextureDestroyed(final SurfaceTexture surface) {
-            if (mPreviewSurface != null) {
-                mPreviewSurface.release();
-                mPreviewSurface = null;
-            }
-            return true;
-        }
-
-        @Override
-        public void onSurfaceTextureUpdated(final SurfaceTexture surface) {
-            if (mEncoder != null && mCaptureState == CAPTURE_RUNNING) {
-                mEncoder.frameAvailable();
-            }
-        }
-    };
-
-
-    private final void startCapture() {
-        if (DEBUG) Log.v(TAG, "startCapture:");
-        if (mEncoder == null && (mCaptureState == CAPTURE_STOP)) {
-            mCaptureState = CAPTURE_PREPARE;
-            queueEvent(new Runnable() {
-                @Override
-                public void run() {
-                    final String path = getCaptureFile(Environment.DIRECTORY_MOVIES, ".mp4");
-                    if (!TextUtils.isEmpty(path)) {
-                        mEncoder = new SurfaceEncoder(path);
-                        mEncoder.setEncodeListener(mEncodeListener);
-                        try {
-                            mEncoder.prepare();
-                            mEncoder.startRecording();
-                        } catch (final IOException e) {
-                            mCaptureState = CAPTURE_STOP;
-                        }
-                    } else
-                        throw new RuntimeException("Failed to start capture.");
-                }
-            }, 0);
-            updateItems();
-        }
-    }
-
-    private final void stopCapture() {
-        if (DEBUG) Log.v(TAG, "stopCapture:");
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (mSync) {
-                    if (mUVCCamera != null) {
-                        mUVCCamera.stopCapture();
-                    }
-                }
-                if (mEncoder != null) {
-                    mEncoder.stopRecording();
-                    mEncoder = null;
-                }
-            }
-        }, 0);
-    }
-
-    private final EncodeListener mEncodeListener = new EncodeListener() {
-        @Override
-        public void onPreapared(final Encoder encoder) {
-            if (DEBUG) Log.v(TAG, "onPreapared:");
-            synchronized (mSync) {
-                if (mUVCCamera != null) {
-                    mUVCCamera.startCapture(((SurfaceEncoder)encoder).getInputSurface());
-                }
-            }
-            mCaptureState = CAPTURE_RUNNING;
-        }
-
-        @Override
-        public void onRelease(final Encoder encoder) {
-            if (DEBUG) Log.v(TAG, "onRelease:");
-            synchronized (mSync) {
-                if (mUVCCamera != null) {
-                    mUVCCamera.stopCapture();
-                }
-            }
-            mCaptureState = CAPTURE_STOP;
-            updateItems();
-        }
-    };
-
-    private synchronized void releaseCamera() {
-        synchronized (mSync) {
-            if (mUVCCamera != null) {
-                try {
-                    mUVCCamera.setStatusCallback(null);
-                    mUVCCamera.setButtonCallback(null);
-                    mUVCCamera.close();
-                    mUVCCamera.destroy();
-                } catch (final Exception e) {
-                    //
-                }
-                mUVCCamera = null;
-            }
-            if (mPreviewSurface != null) {
-                mPreviewSurface.release();
-                mPreviewSurface = null;
-            }
-        }
-    }
-
-    @Override
-    public USBMonitor getUSBMonitor() {
-        return mUSBMonitor;
-    }
-
-    @Override
-    public void onDialogResult(boolean canceled) {
-        if (canceled) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // FIXME
-                }
-            }, 0);
-        }
-    }
 
     private final OnDeviceConnectListener mOnDeviceConnectListener = new OnDeviceConnectListener() {
         @Override
@@ -342,7 +226,7 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
                     }
                 }
             }, 0);
-         //   setCameraButton(false);
+            setCameraButton(false);
         }
 
         @Override
@@ -356,6 +240,163 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         }
     };
 
+    /**
+     * to access from CameraDialog
+     * @return
+     */
+    @Override
+    public USBMonitor getUSBMonitor() {
+        return mUSBMonitor;
+    }
+
+    @Override
+    public void onDialogResult(boolean canceled) {
+        if (canceled) {
+            setCameraButton(false);
+        }
+    }
+
+    private void setCameraButton(final boolean isOn) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mCameraButton != null) {
+                    try {
+                        mCameraButton.setOnCheckedChangeListener(null);
+                        mCameraButton.setChecked(isOn);
+                    } finally {
+                        mCameraButton.setOnCheckedChangeListener(mOnCheckedChangeListener);
+                    }
+                }
+                if (!isOn && (mCaptureButton != null)) {
+                    mCaptureButton.setVisibility(View.INVISIBLE);
+                }
+            }
+        }, 0);
+    }
+
+    //**********************************************************************
+    private final SurfaceTextureListener mSurfaceTextureListener = new SurfaceTextureListener() {
+
+        @Override
+        public void onSurfaceTextureAvailable(final SurfaceTexture surface, final int width, final int height) {
+        }
+
+        @Override
+        public void onSurfaceTextureSizeChanged(final SurfaceTexture surface, final int width, final int height) {
+        }
+
+        @Override
+        public boolean onSurfaceTextureDestroyed(final SurfaceTexture surface) {
+            if (mPreviewSurface != null) {
+                mPreviewSurface.release();
+                mPreviewSurface = null;
+            }
+            return true;
+        }
+
+        @Override
+        public void onSurfaceTextureUpdated(final SurfaceTexture surface) {
+            if (mEncoder != null && mCaptureState == CAPTURE_RUNNING) {
+                mEncoder.frameAvailable();
+            }
+        }
+    };
+
+    private Encoder mEncoder;
+    /**
+     * start capturing
+     */
+    private final void startCapture() {
+        if (DEBUG) Log.v(TAG, "startCapture:");
+        if (mEncoder == null && (mCaptureState == CAPTURE_STOP)) {
+            mCaptureState = CAPTURE_PREPARE;
+            queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    final String path = getCaptureFile(Environment.DIRECTORY_MOVIES, ".mp4");
+                    if (!TextUtils.isEmpty(path)) {
+                        mEncoder = new SurfaceEncoder(path);
+                        mEncoder.setEncodeListener(mEncodeListener);
+                        try {
+                            mEncoder.prepare();
+                            mEncoder.startRecording();
+                        } catch (final IOException e) {
+                            mCaptureState = CAPTURE_STOP;
+                        }
+                    } else
+                        throw new RuntimeException("Failed to start capture.");
+                }
+            }, 0);
+            updateItems();
+        }
+    }
+
+    /**
+     * stop capture if capturing
+     */
+    private final void stopCapture() {
+        if (DEBUG) Log.v(TAG, "stopCapture:");
+        queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mSync) {
+                    if (mUVCCamera != null) {
+                        mUVCCamera.stopCapture();
+                    }
+                }
+                if (mEncoder != null) {
+                    mEncoder.stopRecording();
+                    mEncoder = null;
+                }
+            }
+        }, 0);
+    }
+
+    /**
+     * callbackds from Encoder
+     */
+    private final EncodeListener mEncodeListener = new EncodeListener() {
+        @Override
+        public void onPreapared(final Encoder encoder) {
+            if (DEBUG) Log.v(TAG, "onPreapared:");
+            synchronized (mSync) {
+                if (mUVCCamera != null) {
+                    mUVCCamera.startCapture(((SurfaceEncoder)encoder).getInputSurface());
+                }
+            }
+            mCaptureState = CAPTURE_RUNNING;
+        }
+
+        @Override
+        public void onRelease(final Encoder encoder) {
+            if (DEBUG) Log.v(TAG, "onRelease:");
+            synchronized (mSync) {
+                if (mUVCCamera != null) {
+                    mUVCCamera.stopCapture();
+                }
+            }
+            mCaptureState = CAPTURE_STOP;
+            updateItems();
+        }
+    };
+
+    private void updateItems() {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mCaptureButton.setVisibility(mCameraButton.isChecked() ? View.VISIBLE : View.INVISIBLE);
+                mCaptureButton.setColorFilter(mCaptureState == CAPTURE_STOP ? 0 : 0xffff0000);
+            }
+        });
+    }
+
+    /**
+     * create file path for saving movie / still image file
+     * @param type Environment.DIRECTORY_MOVIES / Environment.DIRECTORY_DCIM
+     * @param ext .mp4 / .png
+     * @return return null if can not write to storage
+     */
     private static final String getCaptureFile(final String type, final String ext) {
         final File dir = new File(Environment.getExternalStoragePublicDirectory(type), "USBCameraTest");
         dir.mkdirs();	// create directories if they do not exist
@@ -370,4 +411,5 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         final GregorianCalendar now = new GregorianCalendar();
         return sDateTimeFormat.format(now.getTime());
     }
+
 }

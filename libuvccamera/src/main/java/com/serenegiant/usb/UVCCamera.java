@@ -40,7 +40,7 @@ import android.view.SurfaceHolder;
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 
 public class UVCCamera {
-	private static final boolean DEBUG = false;	// TODO set false when releasing
+	private static final boolean DEBUG = true;	// TODO set false when releasing
 	private static final String TAG = UVCCamera.class.getSimpleName();
 	private static final String DEFAULT_USBFS = "/dev/bus/usb";
 
@@ -347,12 +347,15 @@ public class UVCCamera {
 			final int format_nums = formats.length();
 			for (int i = 0; i < format_nums; i++) {
 				final JSONObject format = formats.getJSONObject(i);
-				final int format_type = format.getInt("type");
-				if ((format_type == type) || (type == -1)) {
-					addSize(format, format_type, 0, result);
+				if(format.has("type") && format.has("size")) {
+					final int format_type = format.getInt("type");
+					if ((format_type == type) || (type == -1)) {
+						addSize(format, format_type, 0, result);
+					}
 				}
 			}
 		} catch (final JSONException e) {
+			e.printStackTrace();
 		}
 		return result;
 	}

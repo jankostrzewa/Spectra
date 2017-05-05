@@ -7,4 +7,6 @@
     <string name="capture_spectrum">Capture spectrum</string>
     <string name="previous_results">Previous results</string>
     <string name="app_configuration">App configuration</string>
+    <string name="togglebutton">ToggleButton</string>
+    <string name="xd">xd</string>
 </resources>

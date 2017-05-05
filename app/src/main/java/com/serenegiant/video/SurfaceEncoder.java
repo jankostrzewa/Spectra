@@ -23,14 +23,14 @@
 
 package com.serenegiant.video;
 
+import java.io.IOException;
+
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.util.Log;
 import android.view.Surface;
-
-import java.io.IOException;
 
 public class SurfaceEncoder extends Encoder {
 	private static final boolean DEBUG = true;	// set false when releasing

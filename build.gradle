@@ -6,9 +6,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.1'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
@@ -24,9 +21,9 @@ task clean(type: Delete) {
 }
 
 ext {
-    supportLibVersion = '25.0.0'  // variable that can be referenced to keep support libs consistent
-    commonLibVersion= '1.1.9'
-    versionBuildTool = '24.0.3'
+    supportLibVersion = '25.3.1'  // variable that can be referenced to keep support libs consistent
+    commonLibVersion= '1.5.20'
+    versionBuildTool = '25.0.2'
     versionCompiler = 25
     versionTarget = 23
     versionNameString = '1.0.0'
