@@ -32,6 +32,7 @@ import android.media.MediaMuxer;
 import android.util.Log;
 import android.view.Surface;
 
+@SuppressWarnings("ALL")
 public class SurfaceEncoder extends Encoder {
 	private static final boolean DEBUG = true;	// set false when releasing
 	private static final String TAG = "SurfaceEncoder";

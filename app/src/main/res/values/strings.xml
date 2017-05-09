@@ -1,12 +1,12 @@
-<resources>
-    <string name="app_name">Spectra</string>
-    <string name="takePhoto">Take an image</string>
-    <string name="preview_photo">Preview photo</string>
-    <string name="imageAnalysis">Analyze an image</string>
-    <string name="calibrate">Calibrate program</string>
-    <string name="capture_spectrum">Capture spectrum</string>
-    <string name="previous_results">Previous results</string>
-    <string name="app_configuration">App configuration</string>
-    <string name="togglebutton">ToggleButton</string>
-    <string name="xd">xd</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:ignore="MissingTranslation">Spectra</string>
+    <string name="takePhoto" tools:ignore="MissingTranslation">Take an image</string>
+    <string name="preview_photo" tools:ignore="MissingTranslation">Preview photo</string>
+    <string name="imageAnalysis" tools:ignore="MissingTranslation">Analyze an image</string>
+    <string name="calibrate" tools:ignore="MissingTranslation">Calibrate program</string>
+    <string name="capture_spectrum" tools:ignore="MissingTranslation">Capture spectrum</string>
+    <string name="previous_results" tools:ignore="MissingTranslation">Previous results</string>
+    <string name="app_configuration" tools:ignore="MissingTranslation">App configuration</string>
+    <string name="togglebutton" tools:ignore="MissingTranslation">ToggleButton</string>
+    <string name="xd" tools:ignore="MissingTranslation">xd</string>
 </resources>

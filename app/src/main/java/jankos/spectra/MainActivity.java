@@ -5,8 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -23,9 +21,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Config config;
     private Button btnCaptureSpectrum;
-    private final int PERMISSIONS_CAMERA = 7089;
-    private final int PERMISSIONS_READ = 7090;
-    private final int PERMISSIONS_WRITE = 7091;
     final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
 
     @Override
@@ -113,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 requestPermissions(permissionsList.toArray(new String[permissionsList.size()]),
                         REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
-                return;
             }
 
 //        int hasCameraPermission = checkSelfPermission(Manifest.permission.CAMERA);

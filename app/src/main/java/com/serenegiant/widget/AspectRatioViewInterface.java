@@ -23,6 +23,7 @@
 
 package com.serenegiant.widget;
 
+@SuppressWarnings("ALL")
 public interface AspectRatioViewInterface {
     public void setAspectRatio(double aspectRatio);
     public void onPause();

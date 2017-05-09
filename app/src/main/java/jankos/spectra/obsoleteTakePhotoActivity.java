@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+@SuppressWarnings("ALL")
 public class obsoleteTakePhotoActivity extends AppCompatActivity {
 
     private final static int ACTIVITY_START_CAMERA_APP = 0;//a unique code returned to intent in takePhoto to know who's answering

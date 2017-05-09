@@ -33,6 +33,7 @@ import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.util.Log;
 
+@SuppressWarnings("ALL")
 public abstract class Encoder implements Runnable {
 	private static final boolean DEBUG = true;	// TODO set false on release
 	private static final String TAG = "Encoder";

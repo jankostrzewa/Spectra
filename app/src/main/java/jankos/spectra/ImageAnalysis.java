@@ -1,12 +1,9 @@
 package jankos.spectra;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.Toast;
+
+import java.util.Arrays;
 
 
 public class ImageAnalysis{
@@ -26,14 +23,12 @@ public class ImageAnalysis{
         return imageAnalysis;
     }
 
-    public void analyzeImage(Bitmap bitmap){
+    public double[] analyzeImage(Bitmap bitmap){
         if(bitmap != null){
             double[] values = sumImageToColumns(bitmap);
-            System.out.print(values);
+            return values;
         }
-        else{
-
-        }
+        else return null;
     }
 
     private void config() throws Exception{
@@ -48,7 +43,7 @@ public class ImageAnalysis{
 
     }
 
-    private double[] sumImageToColumns(Bitmap bitmap){
+    public double[] sumImageToColumns(Bitmap bitmap){
     //    double spectrumWidth = config.maximumWavelength.wavelength - config.minimalWavelength.wavelength;
     //    double resolution = spectrumWidth; //
         int x=bitmap.getWidth();

@@ -23,8 +23,6 @@ public final class Config {
     boolean IsCalibrated = false;
     int SCREENWIDTH = 0;
     int SCREENHEIGHT = 0;
-    obsoleteDatapoint minimalWavelength;
-    obsoleteDatapoint maximumWavelength;
     boolean CALIBRATING;
     String filePath = "";
 

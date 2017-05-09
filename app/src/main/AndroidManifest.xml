@@ -9,6 +9,7 @@
 
     <application
         android:allowBackup="true"
+        android:extractNativeLibs="false"
         android:icon="@mipmap/rainbow"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -25,7 +26,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".obsoleteTakePhotoActivity" />
-        <activity android:name=".ImageAnalysis" />
         <activity android:name=".CalibrationActivity" />
         <activity android:name=".CaptureUsbActivity" />
         <activity android:name=".PreviousResultsActivity" />
