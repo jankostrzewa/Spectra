@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
@@ -70,9 +71,11 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
     private Surface mPreviewSurface;
 
     private ImageView mImageViewCapture;
-   // private ImageView mImageViewSpectrum;
 
     private XYPlot plot;
+    private Config config;
+
+    private String mSupportedSizesJSON;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -82,6 +85,7 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         /* Setting up USB capture */
 
         setContentView(R.layout.activity_capture); // ensure the correct view is assigned!!
+        config = Config.GetInstance();
 
         mCaptureButton = (ImageButton) findViewById(R.id.capture_button);
         mCaptureButton.setOnClickListener(mOnClickListener);
@@ -96,49 +100,26 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         mCameraButton.setOnCheckedChangeListener(mOnCheckedChangeListener);
 
         mImageViewCapture = (ImageView) findViewById(R.id.imageViewCapture);
-        mImageViewCapture.setImageResource(R.drawable.example_small);
+        //mImageViewCapture.setImageResource(R.drawable.example_small);
 
         /* End USB Capture */
 
-        Double[] hoho = ImageAnalysis.ImageAnalysisFactory().sumImageToColumns(BitmapFactory.decodeResource(getResources(), R.drawable.example_small));
-        Double.tr
-        /* Setting up XYPlot*/
+        /* Setting up XYPlot */
         plot = (XYPlot) findViewById(R.id.plot);
 
         final Number[] domainLabels = {1, 2, 3, 6, 7, 8, 9, 10, 13, 14};
-        Number[] series1Numbers = {1, 4, 2, 8, 4, 16, 8, 32, 16, 64};
-        Number[] series2Numbers = {5, 2, 10, 5, 20, 10, 40, 20, 80, 40};
+        Number[] series1Numbers = {1, 4, 2, 8, 32, 16, 64, 16, 8, 32, 16, 64};
 
         // turn the above arrays into XYSeries':
         // (Y_VALS_ONLY means use the element index as the x value)
         XYSeries series1 = new SimpleXYSeries(
                 Arrays.asList(series1Numbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series1");
-        XYSeries series2 = new SimpleXYSeries(
-                Arrays.asList(series2Numbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series2");
 
-        // create formatters to use for drawing a series using LineAndPointRenderer
-        // and configure them from xml:
         LineAndPointFormatter series1Format = new LineAndPointFormatter(Color.RED, Color.GREEN, Color.BLUE, null);
-        LineAndPointFormatter series2Format = new LineAndPointFormatter(Color.RED, Color.GREEN, Color.BLUE, null);
 
-        // add an "dash" effect to the series2 line:
-        series2Format.getLinePaint().setPathEffect(new DashPathEffect(new float[]{
-
-                // always use DP when specifying pixel sizes, to keep things consistent across devices:
-                PixelUtils.dpToPix(20),
-                PixelUtils.dpToPix(15)}, 0));
-
-        // just for fun, add some smoothing to the lines:
-        // see: http://androidplot.com/smooth-curves-and-androidplot/
-        //series1Format.setInterpolationParams(
-        //        new CatmullRomInterpolator.Params(10, CatmullRomInterpolator.Type.Centripetal));
-
-        series2Format.setInterpolationParams(
-                new CatmullRomInterpolator.Params(10, CatmullRomInterpolator.Type.Centripetal));
         // add a new series' to the xyplot:
         //plot.setLinesPerDomainLabel(0);
         plot.addSeries(series1, series1Format);
-        //plot.addSeries(series2, series2Format);
 
         plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
             @Override
@@ -245,15 +226,20 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
                 public void run() {
                     final UVCCamera camera = new UVCCamera();
                     camera.open(ctrlBlock);
-                    if (DEBUG) Log.i(TAG, "supportedSize:" + camera.getSupportedSize());
+                    mSupportedSizesJSON = camera.getSupportedSize();
+                    if (DEBUG) Log.i(TAG, "supportedSize:" + mSupportedSizesJSON);
+                    config.SetCameraSizes(mSupportedSizesJSON);
                     if (mPreviewSurface != null) {
                         mPreviewSurface.release();
                         mPreviewSurface = null;
                     }
                     try {
-                        camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, UVCCamera.FRAME_FORMAT_MJPEG);
+//                        camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 5);
+                        camera.setPreviewSize(config.CAMERAWIDTH, config.CAMERAHEIGHT,UVCCamera.FRAME_FORMAT_YUYV);
+                        //Toast.makeText(CaptureUsbActivity.this,config.CAMERAWIDTH + " " + config.CAMERAHEIGHT,Toast.LENGTH_LONG).show();
                     } catch (final IllegalArgumentException e) {
                         try {
+                            e.printStackTrace();
                             // fallback to YUV mode
                             camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, UVCCamera.DEFAULT_PREVIEW_MODE);
                         } catch (final IllegalArgumentException e1) {
@@ -261,6 +247,7 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
                             return;
                         }
                     }
+                    Toast.makeText(CaptureUsbActivity.this,camera.getPreviewSize().toString(),Toast.LENGTH_LONG).show();
                     final SurfaceTexture st = mUVCCameraView.getSurfaceTexture();
                     if (st != null) {
                         mPreviewSurface = new Surface(st);
@@ -364,6 +351,15 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         public void onSurfaceTextureUpdated(final SurfaceTexture surface) {
             if (mEncoder != null && mCaptureState == CAPTURE_RUNNING) {
                 mEncoder.frameAvailable();
+//                final Bitmap bitmap = mUVCCameraView.getBitmap();
+//                queueEvent(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        ImageAnalysis.analyzeImage(bitmap, new AnalyzeCallback(){
+//                            @Override
+//                        })
+//                    }
+//                }, 0);
             }
         }
     };

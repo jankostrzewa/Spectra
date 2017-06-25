@@ -8,22 +8,12 @@ import java.util.Arrays;
 
 public class ImageAnalysis{
 
-    private double[] columnValues;
-    private Config config;
-    String mImageFileLocation;
-    private static ImageAnalysis imageAnalysis;
-
-    private ImageAnalysis() {
+    private static Config config;
+    static{
         config = Config.GetInstance();
     }
 
-    public static ImageAnalysis ImageAnalysisFactory(){
-        if(imageAnalysis == null)
-            imageAnalysis = new ImageAnalysis();
-        return imageAnalysis;
-    }
-
-    public double[] analyzeImage(Bitmap bitmap){
+    public static double[] analyzeImage(Bitmap bitmap, AnalyzeCallback analyzeCallback){
         if(bitmap != null){
             double[] values = sumImageToColumns(bitmap);
             return values;
@@ -31,19 +21,7 @@ public class ImageAnalysis{
         else return null;
     }
 
-    private void config() throws Exception{
-        if(config.ImageLoaded)
-            mImageFileLocation = config.filePath;
-        else {
-            throw new Exception("Config not loaded!");
-        }
-        if(!config.IsCalibrated)
-            throw new Exception("Camera not calibrated!");
-
-
-    }
-
-    public double[] sumImageToColumns(Bitmap bitmap){
+    private static double[] sumImageToColumns(Bitmap bitmap){
     //    double spectrumWidth = config.maximumWavelength.wavelength - config.minimalWavelength.wavelength;
     //    double resolution = spectrumWidth; //
         int x=bitmap.getWidth();
