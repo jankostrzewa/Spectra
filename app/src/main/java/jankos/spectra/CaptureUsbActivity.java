@@ -2,6 +2,7 @@ package jankos.spectra;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
@@ -14,6 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
@@ -39,6 +41,7 @@ import com.androidplot.xy.XYSeries;
 import com.androidplot.xy.*;
 import com.serenegiant.common.BaseActivity;
 import com.serenegiant.usb.CameraDialog;
+import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.USBMonitor.OnDeviceConnectListener;
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
@@ -48,14 +51,12 @@ import com.serenegiant.video.Encoder.EncodeListener;
 import com.serenegiant.video.SurfaceEncoder;
 import com.serenegiant.widget.SimpleUVCCameraTextureView;
 
+import static jankos.spectra.R.string.imageAnalysis;
+
 
 public final class CaptureUsbActivity extends BaseActivity implements CameraDialog.CameraDialogParent  {
     private static final boolean DEBUG = true;	// set false when releasing
     private static final String TAG = "CaptureUsbActivity";
-
-    private static final int CAPTURE_STOP = 0;
-    private static final int CAPTURE_PREPARE = 1;
-    private static final int CAPTURE_RUNNING = 2;
 
     private final Object mSync = new Object();
     // for accessing USB and USB camera
@@ -64,18 +65,19 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
     private SimpleUVCCameraTextureView mUVCCameraView;
     // for open&start / stop&close camera preview
     private ToggleButton mCameraButton;
-    // for start & stop movie capture
-    private ImageButton mCaptureButton;
 
     private int mCaptureState = 0;
     private Surface mPreviewSurface;
 
-    private ImageView mImageViewCapture;
 
     private XYPlot plot;
     private Config config;
 
     private String mSupportedSizesJSON;
+
+    private Bitmap tempBitmap;
+    LineAndPointFormatter series1Format;
+    XYSeries series1;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -84,11 +86,8 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
 
         /* Setting up USB capture */
 
-        setContentView(R.layout.activity_capture); // ensure the correct view is assigned!!
+        setContentView(R.layout.activity_capture);
         config = Config.GetInstance();
-
-        mCaptureButton = (ImageButton) findViewById(R.id.capture_button);
-        mCaptureButton.setOnClickListener(mOnClickListener);
 
         mUVCCameraView = (SimpleUVCCameraTextureView) findViewById(R.id.UVCCameraTextureView1);
         mUVCCameraView.setAspectRatio(UVCCamera.DEFAULT_PREVIEW_WIDTH / (float) UVCCamera.DEFAULT_PREVIEW_HEIGHT);
@@ -99,39 +98,12 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         mCameraButton = (ToggleButton) findViewById(R.id.camera_button);
         mCameraButton.setOnCheckedChangeListener(mOnCheckedChangeListener);
 
-        mImageViewCapture = (ImageView) findViewById(R.id.imageViewCapture);
-        //mImageViewCapture.setImageResource(R.drawable.example_small);
-
         /* End USB Capture */
 
         /* Setting up XYPlot */
+
         plot = (XYPlot) findViewById(R.id.plot);
-
-        final Number[] domainLabels = {1, 2, 3, 6, 7, 8, 9, 10, 13, 14};
-        Number[] series1Numbers = {1, 4, 2, 8, 32, 16, 64, 16, 8, 32, 16, 64};
-
-        // turn the above arrays into XYSeries':
-        // (Y_VALS_ONLY means use the element index as the x value)
-        XYSeries series1 = new SimpleXYSeries(
-                Arrays.asList(series1Numbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series1");
-
-        LineAndPointFormatter series1Format = new LineAndPointFormatter(Color.RED, Color.GREEN, Color.BLUE, null);
-
-        // add a new series' to the xyplot:
-        //plot.setLinesPerDomainLabel(0);
-        plot.addSeries(series1, series1Format);
-
-        plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
-            @Override
-            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-                int i = Math.round(((Number) obj).floatValue());
-                return toAppendTo.append(domainLabels[i]);
-            }
-            @Override
-            public Object parseObject(String source, ParsePosition pos) {
-                return null;
-            }
-        });
+        series1Format = new LineAndPointFormatter(Color.RED, Color.GREEN, null, null);
     }
 
     @Override
@@ -145,14 +117,12 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
                 mUVCCamera.startPreview();
         }
         setCameraButton(false);
-        updateItems();
     }
 
     @Override
     protected void onStop() {
         synchronized (mSync) {
             if (mUVCCamera != null) {
-                stopCapture();
                 mUVCCamera.stopPreview();
             }
             mUSBMonitor.unregister();
@@ -174,7 +144,6 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
             }
         }
         mCameraButton = null;
-        mCaptureButton = null;
         mUVCCameraView = null;
         super.onDestroy();
     }
@@ -188,20 +157,6 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
                 } else if (mUVCCamera != null) {
                     mUVCCamera.destroy();
                     mUVCCamera = null;
-                }
-            }
-            updateItems();
-        }
-    };
-
-    private final OnClickListener mOnClickListener = new OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            if (checkPermissionWriteExternalStorage()) {
-                if (mCaptureState == CAPTURE_STOP) {
-                    startCapture();
-                } else {
-                    stopCapture();
                 }
             }
         }
@@ -234,9 +189,7 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
                         mPreviewSurface = null;
                     }
                     try {
-//                        camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 5);
                         camera.setPreviewSize(config.CAMERAWIDTH, config.CAMERAHEIGHT,UVCCamera.FRAME_FORMAT_YUYV);
-                        //Toast.makeText(CaptureUsbActivity.this,config.CAMERAWIDTH + " " + config.CAMERAHEIGHT,Toast.LENGTH_LONG).show();
                     } catch (final IllegalArgumentException e) {
                         try {
                             e.printStackTrace();
@@ -247,11 +200,15 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
                             return;
                         }
                     }
-                    Toast.makeText(CaptureUsbActivity.this,camera.getPreviewSize().toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(CaptureUsbActivity.this,camera.getPreviewSize().width + " " + camera.getPreviewSize().height,Toast.LENGTH_LONG).show();
+//                    adjustAspectRatio(camera.getPreviewSize().width, camera.getPreviewSize().height);
                     final SurfaceTexture st = mUVCCameraView.getSurfaceTexture();
                     if (st != null) {
+                        tempBitmap =  Bitmap.createBitmap(config.CAMERAWIDTH,config.CAMERAHEIGHT, Bitmap.Config.RGB_565);
+
                         mPreviewSurface = new Surface(st);
                         camera.setPreviewDisplay(mPreviewSurface);
+                        camera.setFrameCallback(mFrameCallback,UVCCamera.FRAME_FORMAT_YUYV);
                         camera.startPreview();
                     }
                     synchronized (mSync) {
@@ -292,10 +249,6 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         }
     };
 
-    /**
-     * to access from CameraDialog
-     * @return
-     */
     @Override
     public USBMonitor getUSBMonitor() {
         return mUSBMonitor;
@@ -320,13 +273,9 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
                         mCameraButton.setOnCheckedChangeListener(mOnCheckedChangeListener);
                     }
                 }
-                if (!isOn && (mCaptureButton != null)) {
-                    mCaptureButton.setVisibility(View.INVISIBLE);
-                }
             }
         }, 0);
     }
-
     //**********************************************************************
     private final SurfaceTextureListener mSurfaceTextureListener = new SurfaceTextureListener() {
 
@@ -349,123 +298,9 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
 
         @Override
         public void onSurfaceTextureUpdated(final SurfaceTexture surface) {
-            if (mEncoder != null && mCaptureState == CAPTURE_RUNNING) {
-                mEncoder.frameAvailable();
-//                final Bitmap bitmap = mUVCCameraView.getBitmap();
-//                queueEvent(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        ImageAnalysis.analyzeImage(bitmap, new AnalyzeCallback(){
-//                            @Override
-//                        })
-//                    }
-//                }, 0);
-            }
+
         }
     };
-
-    private Encoder mEncoder;
-    /**
-     * start capturing
-     */
-    private final void startCapture() {
-        if (DEBUG) Log.v(TAG, "startCapture:");
-        if (mEncoder == null && (mCaptureState == CAPTURE_STOP)) {
-            mCaptureState = CAPTURE_PREPARE;
-            queueEvent(new Runnable() {
-                @Override
-                public void run() {
-                    final String path = getCaptureFile(Environment.DIRECTORY_MOVIES, ".mp4");
-                    if (!TextUtils.isEmpty(path)) {
-                        mEncoder = new SurfaceEncoder(path);
-                        mEncoder.setEncodeListener(mEncodeListener);
-                        try {
-                            mEncoder.prepare();
-                            mEncoder.startRecording();
-                        } catch (final IOException e) {
-                            mCaptureState = CAPTURE_STOP;
-                        }
-                    } else
-                        throw new RuntimeException("Failed to start capture.");
-                }
-            }, 0);
-            updateItems();
-        }
-    }
-
-    /**
-     * stop capture if capturing
-     */
-    private final void stopCapture() {
-        if (DEBUG) Log.v(TAG, "stopCapture:");
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (mSync) {
-                    if (mUVCCamera != null) {
-                        mUVCCamera.stopCapture();
-                    }
-                }
-                if (mEncoder != null) {
-                    mEncoder.stopRecording();
-                    mEncoder = null;
-                }
-            }
-        }, 0);
-    }
-
-    /**
-     * callbackds from Encoder
-     */
-    private final EncodeListener mEncodeListener = new EncodeListener() {
-        @Override
-        public void onPreapared(final Encoder encoder) {
-            if (DEBUG) Log.v(TAG, "onPreapared:");
-            synchronized (mSync) {
-                if (mUVCCamera != null) {
-                    mUVCCamera.startCapture(((SurfaceEncoder)encoder).getInputSurface());
-                }
-            }
-            mCaptureState = CAPTURE_RUNNING;
-        }
-
-        @Override
-        public void onRelease(final Encoder encoder) {
-            if (DEBUG) Log.v(TAG, "onRelease:");
-            synchronized (mSync) {
-                if (mUVCCamera != null) {
-                    mUVCCamera.stopCapture();
-                }
-            }
-            mCaptureState = CAPTURE_STOP;
-            updateItems();
-        }
-    };
-
-    private void updateItems() {
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mCaptureButton.setVisibility(mCameraButton.isChecked() ? View.VISIBLE : View.INVISIBLE);
-                mCaptureButton.setColorFilter(mCaptureState == CAPTURE_STOP ? 0 : 0xffff0000);
-            }
-        });
-    }
-
-    /**
-     * create file path for saving movie / still image file
-     * @param type Environment.DIRECTORY_MOVIES / Environment.DIRECTORY_DCIM
-     * @param ext .mp4 / .png
-     * @return return null if can not write to storage
-     */
-    private static final String getCaptureFile(final String type, final String ext) {
-        final File dir = new File(Environment.getExternalStoragePublicDirectory(type), "USBCameraTest");
-        dir.mkdirs();	// create directories if they do not exist
-        if (dir.canWrite()) {
-            return (new File(dir, getDateTimeString() + ext)).toString();
-        }
-        return null;
-    }
 
     private static final SimpleDateFormat sDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US);
     private static final String getDateTimeString() {
@@ -473,4 +308,64 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         return sDateTimeFormat.format(now.getTime());
     }
 
+    private final IFrameCallback mFrameCallback = new IFrameCallback() {
+        @Override
+        public void onFrame(final ByteBuffer frame) {
+
+            synchronized(tempBitmap){
+                tempBitmap.copyPixelsFromBuffer(frame);
+            }
+            queueEvent(new Runnable() {
+                           @Override
+                           public void run() {
+                               ImageAnalysis.analyzeImage(tempBitmap, new AnalyzeCallback() {
+                                   @Override
+                                   public void onAnalyzeSuccess(Number[] values, String result) {
+                                       plot.clear();
+                                       series1 = new SimpleXYSeries(Arrays.asList(values), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series1");
+                                       plot.addSeries(series1,series1Format);
+                                       plot.redraw();
+                                       Log.i(TAG,result);
+//                                       Log.i(TAG,result + "; r: " + values[0] + "; g: " + values[1] + "; b: " + values[2] + "; i: " + values[3]);
+                                   }
+
+                                   @Override
+                                   public void onAnalyzeFailed() {
+                                       Log.i(TAG,"fail!");
+                                   }
+                               });
+                           }
+                       }
+                    , 0);
+        }
+    };
+
+    private void adjustAspectRatio(int videoWidth, int videoHeight) {
+        int viewWidth = mUVCCameraView.getWidth();
+        int viewHeight = mUVCCameraView.getHeight();
+        double aspectRatio = (double) videoHeight / videoWidth;
+
+        int newWidth, newHeight;
+        if (viewHeight > (int) (viewWidth * aspectRatio)) {
+            // limited by narrow width; restrict height
+            newWidth = viewWidth;
+            newHeight = (int) (viewWidth * aspectRatio);
+        } else {
+            // limited by short height; restrict width
+            newWidth = (int) (viewHeight / aspectRatio);
+            newHeight = viewHeight;
+        }
+        int xoff = (viewWidth - newWidth) / 2;
+        int yoff = (viewHeight - newHeight) / 2;
+        Log.v(TAG, "video=" + videoWidth + "x" + videoHeight +
+                " view=" + viewWidth + "x" + viewHeight +
+                " newView=" + newWidth + "x" + newHeight +
+                " off=" + xoff + "," + yoff);
+
+        Matrix txform = new Matrix();
+        mUVCCameraView.getTransform(txform);
+        txform.setScale((float) newWidth / viewWidth, (float) newHeight / viewHeight);
+        txform.postTranslate(xoff, yoff);
+        mUVCCameraView.setTransform(txform);
+    }
 }

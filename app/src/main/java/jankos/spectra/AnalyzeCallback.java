@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 public interface AnalyzeCallback{
 
-    public void onAnalyzeSuccess(double[] values, String result);
+    public void onAnalyzeSuccess(Number[] values, String result);
 
     public void onAnalyzeFailed();
 }

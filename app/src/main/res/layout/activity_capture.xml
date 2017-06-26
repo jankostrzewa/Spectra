@@ -34,9 +34,10 @@
         android:id="@+id/UVCCameraTextureView1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"
         android:layout_gravity="center"
-        android:background="#ff000000" />
+        android:background="#ff000000"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/plot" />
 
     <ImageView
         android:id="@+id/imageViewCapture"
@@ -61,19 +62,6 @@
         ap:gridBackgroundColor="@color/ap_black"
         ap:rangeTitle="Intensity(%)" />
 
-    <ImageButton
-        android:id="@+id/capture_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="false"
-        android:background="@null"
-        android:padding="3dp"
-        android:scaleType="fitXY"
-        android:src="@android:drawable/ic_menu_camera"
-        android:contentDescription="@string/xd"
-        android:layout_above="@+id/camera_button"
-        android:layout_centerHorizontal="true" />
-
     <ToggleButton
         android:id="@+id/camera_button"
         android:layout_width="wrap_content"
@@ -81,5 +69,23 @@
         android:text="@string/togglebutton"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/plot"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/camera_button"
+        android:layout_alignParentBottom="true" />
+
+    <SeekBar
+        android:id="@+id/seekBar2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/plot"
+        android:layout_toEndOf="@+id/camera_button" />
 
 </RelativeLayout>
