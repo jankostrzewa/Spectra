@@ -122,7 +122,6 @@ public class obsoleteTakePhotoActivity extends AppCompatActivity {
 
     public void imageAnalysis(View view){
         config.filePath = mImageFileLocation;
-        config.ImageLoaded = true;
         Intent intent = new Intent(this, ImageAnalysis.class);
         startActivity(intent);
     }

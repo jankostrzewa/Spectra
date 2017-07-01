@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         config.SCREENWIDTH = metrics.widthPixels;
         config.SCREENHEIGHT = metrics.heightPixels;
-        config.HasCamera = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
         getApplicationContext();
     }
 
@@ -77,9 +76,9 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    public void requestPermissions() {
-            List<String> permissionsNeeded = new ArrayList<String>();
-            final List<String> permissionsList = new ArrayList<String>();
+    private void requestPermissions() {
+            List<String> permissionsNeeded = new ArrayList<>();
+            final List<String> permissionsList = new ArrayList<>();
             if (!addPermission(permissionsList, Manifest.permission.CAMERA))
                 permissionsNeeded.add("Camera");
             if (!addPermission(permissionsList, Manifest.permission.READ_EXTERNAL_STORAGE))
@@ -123,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
             {
-                Map<String, Integer> perms = new HashMap<String, Integer>();
+                Map<String, Integer> perms = new HashMap<>();
                 perms.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_GRANTED);
                 perms.put(Manifest.permission.READ_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
                 perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);

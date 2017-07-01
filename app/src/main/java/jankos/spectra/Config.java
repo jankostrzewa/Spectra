@@ -1,8 +1,5 @@
 package jankos.spectra;
 
-import android.content.Context;
-import android.widget.Toast;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,33 +22,26 @@ public final class Config {
         return instance;
     }
 
-    boolean ImageLoaded = false;
-    boolean HasCamera = false;
-    boolean IsCalibrated = false;
-    int SCREENWIDTH = 0;
-    int SCREENHEIGHT = 0;
-    int CAMERAWIDTH = 0;
-    int CAMERAHEIGHT = 0;
-    boolean CALIBRATING;
+    int SCREENWIDTH = 200;
+    int SCREENHEIGHT = 320;
+    int CAMERAWIDTH = 640;
+    int CAMERAHEIGHT = 480;
+    int LAMBDAMIN = 350;
+    int LAMBDAMAX = 800;
     String filePath;
-    String[] sizes;
-
-    private void readSettingsFromFile() {
-
-
-    }
+    private String[] sizes;
 
     private void setSizes(){
         String[] sizes = this.sizes;
         int maxWidth = 0;
         int maxHeight = 0;
         int maxArea = 0;
-        for(int i = 0 ; i < sizes.length ; i++) {
-            String[] parts = sizes[i].split("x");
+        for (String size : sizes) {
+            String[] parts = size.split("x");
             int width = Integer.parseInt(parts[0]);
             int height = Integer.parseInt(parts[1]);
             int surfaceArea = width * height;
-            if(width > maxWidth && height > maxHeight && surfaceArea > maxArea){
+            if (width > maxWidth && height > maxHeight && surfaceArea > maxArea) {
                 maxWidth = width;
                 maxHeight = height;
                 maxArea = surfaceArea;

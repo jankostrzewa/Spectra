@@ -1,10 +1,8 @@
 package jankos.spectra;
 
-import android.graphics.Bitmap;
+interface AnalyzeCallback{
 
-public interface AnalyzeCallback{
+    void onAnalyzeSuccess(Number[] values, String result);
 
-    public void onAnalyzeSuccess(Number[] values, String result);
-
-    public void onAnalyzeFailed();
+    void onAnalyzeFailed();
 }

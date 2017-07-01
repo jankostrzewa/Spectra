@@ -21,7 +21,7 @@
   ~  Files in the libjpeg-turbo, libusb, libuvc, rapidjson folder
   ~  may have a different license, see the respective files.
   -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:ap="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
@@ -30,62 +30,214 @@
     tools:context="jankos.spectra.CaptureUsbActivity"
     tools:ignore="MergeRootFrame">
 
-    <com.serenegiant.widget.SimpleUVCCameraTextureView
-        android:id="@+id/UVCCameraTextureView1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:background="#ff000000"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/plot" />
-
-    <ImageView
-        android:id="@+id/imageViewCapture"
+    <TextView
+        android:id="@+id/textViewAnimatePlot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/UVCCameraTextureView1"
-        android:layout_alignRight="@+id/UVCCameraTextureView1"
-        android:src="@drawable/border"
-        android:contentDescription="@string/xd"
-        android:layout_alignParentTop="true" />
+        android:layout_marginLeft="166dp"
+        android:text="@string/plot_animate"
+        ap:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="0dp"
+        ap:layout_constraintBottom_toTopOf="@+id/btnAnimatePlot" />
+
+    <EditText
+        android:id="@+id/inX2"
+        android:layout_width="65dp"
+        android:layout_height="42dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="99dp"
+        android:layout_marginTop="8dp"
+        android:maxLength="4"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        ap:layout_constraintHorizontal_bias="0.025"
+        ap:layout_constraintLeft_toRightOf="@+id/txtX2"
+        ap:layout_constraintRight_toRightOf="parent"
+        ap:layout_constraintTop_toBottomOf="@+id/inX1" />
+
+    <TextView
+        android:id="@+id/txtX2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/x_2"
+        android:textSize="18sp"
+        android:layout_marginTop="33dp"
+        ap:layout_constraintTop_toBottomOf="@+id/txtX1"
+        ap:layout_constraintLeft_toRightOf="@+id/inLambda2"
+        android:layout_marginLeft="7dp" />
+
+    <TextView
+        android:id="@+id/txtX1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/x_1"
+        android:textSize="18sp"
+        ap:layout_constraintLeft_toRightOf="@+id/inLambda1"
+        android:layout_marginLeft="7dp"
+        android:layout_marginTop="16dp"
+        ap:layout_constraintTop_toBottomOf="@+id/plot" />
+
+    <com.serenegiant.widget.SimpleUVCCameraTextureView
+        android:id="@+id/UVCCameraTextureView1"
+        android:layout_width="410dp"
+        android:layout_height="230dp"
+        android:background="#ff000000"
+        tools:layout_conversion_absoluteX="0dp"
+        tools:layout_conversion_absoluteY="0dp"
+        tools:layout_conversion_absoluteWidth="411dp"
+        tools:layout_conversion_absoluteHeight="354dp"
+        android:layout_marginTop="-10dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        ap:layout_constraintTop_toTopOf="parent"
+        ap:layout_constraintRight_toRightOf="parent"
+        ap:layout_constraintLeft_toLeftOf="parent"
+        ap:layout_constraintHorizontal_bias="0.533" />
 
     <com.androidplot.xy.XYPlot
         android:id="@+id/plot"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_above="@+id/camera_button"
-        android:layout_alignParentStart="true"
-        ap:renderMode="use_background_thread"
+        android:layout_height="198dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="0dp"
         ap:domainTitle="Wavelength"
         ap:drawGridOnTop="false"
         ap:graphBackgroundColor="@color/ap_black"
         ap:gridBackgroundColor="@color/ap_black"
-        ap:rangeTitle="Intensity(%)" />
+        ap:layout_constraintLeft_toLeftOf="parent"
+        ap:layout_constraintRight_toRightOf="parent"
+        ap:layout_constraintTop_toBottomOf="@+id/UVCCameraTextureView1"
+        ap:rangeTitle="Intensity(%)"
+        ap:domainTitleTextSize="10dp"
+        ap:rangeTitleTextSize="10dp"
+        ap:paddingTop="10dp"
+        ap:paddingBottom="10dp"
+        ap:paddingLeft="10dp"
+        ap:paddingRight="10dp"
+        ap:renderMode="use_background_thread"
+        tools:layout_conversion_absoluteHeight="200dp"
+        tools:layout_conversion_absoluteWidth="411dp"
+        tools:layout_conversion_absoluteX="0dp"
+        tools:layout_conversion_absoluteY="354dp" />
 
     <ToggleButton
         android:id="@+id/camera_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/togglebutton"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        tools:layout_conversion_absoluteX="161dp"
+        tools:layout_conversion_absoluteY="554dp"
+        tools:layout_conversion_absoluteWidth="88dp"
+        tools:layout_conversion_absoluteHeight="48dp"
+        ap:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="-3dp"
+        ap:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
+        ap:layout_constraintRight_toRightOf="parent"
+        ap:layout_constraintHorizontal_bias="0.05" />
 
-    <SeekBar
-        android:id="@+id/seekBar"
+    <EditText
+        android:id="@+id/inLambda2"
+        android:layout_width="65dp"
+        android:layout_height="45dp"
+        android:ems="10"
+        android:maxLength="3"
+        android:inputType="numberDecimal"
+        android:layout_marginTop="8dp"
+        ap:layout_constraintTop_toBottomOf="@+id/inLambda1"
+        ap:layout_constraintLeft_toRightOf="@+id/txtLambda2"
+        android:layout_marginLeft="8dp" />
+
+    <EditText
+        android:id="@+id/inLambda1"
+        android:layout_width="65dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="8dp"
+        android:maxLength="3"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        ap:layout_constraintTop_toBottomOf="@+id/plot"
+        ap:layout_constraintLeft_toRightOf="@+id/txtLambda1"
+        android:layout_marginLeft="8dp" />
+
+    <EditText
+        android:id="@+id/inX1"
+        android:layout_width="65dp"
+        android:layout_height="42dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:maxLength="4"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        ap:layout_constraintLeft_toRightOf="@+id/txtX1"
+        ap:layout_constraintTop_toBottomOf="@+id/plot" />
+
+    <TextView
+        android:id="@+id/txtLambda1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/plot"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/camera_button"
-        android:layout_alignParentBottom="true" />
+        android:text="@string/_1"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp"
+        ap:layout_constraintTop_toBottomOf="@+id/plot"
+        android:layout_marginLeft="8dp"
+        ap:layout_constraintLeft_toLeftOf="parent" />
 
-    <SeekBar
-        android:id="@+id/seekBar2"
+    <TextView
+        android:id="@+id/txtLambda2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/plot"
-        android:layout_toEndOf="@+id/camera_button" />
+        android:text="@string/_2"
+        android:textSize="18sp"
+        android:layout_marginLeft="8dp"
+        ap:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="33dp"
+        ap:layout_constraintTop_toBottomOf="@+id/txtLambda1" />
 
-</RelativeLayout>
+    <ToggleButton
+        android:id="@+id/btnAnimatePlot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="1dp"
+        android:checked="true"
+        ap:layout_constraintBottom_toBottomOf="parent"
+        ap:layout_constraintHorizontal_bias="0.498"
+        ap:layout_constraintLeft_toLeftOf="parent"
+        ap:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:text="@string/usb_camera"
+        ap:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="0dp"
+        ap:layout_constraintBottom_toTopOf="@+id/camera_button" />
+
+    <Button
+        android:id="@+id/btnRecalculate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="1dp"
+        android:layout_marginRight="16dp"
+        android:onClick="recalculate"
+        android:text="@string/recalculate"
+        ap:layout_constraintBottom_toBottomOf="parent"
+        ap:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/btnPlotExport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="exportPlot"
+        android:text="@string/plot_export"
+        ap:layout_constraintLeft_toRightOf="@+id/inX1"
+        ap:layout_constraintRight_toRightOf="parent"
+        ap:layout_constraintTop_toBottomOf="@+id/plot" />
+
+</android.support.constraint.ConstraintLayout>

@@ -9,4 +9,12 @@
     <string name="app_configuration" tools:ignore="MissingTranslation">App configuration</string>
     <string name="togglebutton" tools:ignore="MissingTranslation">ToggleButton</string>
     <string name="xd" tools:ignore="MissingTranslation">xd</string>
+    <string name="plot_animate">Plot animate</string>
+    <string name="x_2">x (2)</string>
+    <string name="x_1">x (1)</string>
+    <string name="_1">λ (1)</string>
+    <string name="usb_camera">USB Camera</string>
+    <string name="recalculate">Recalculate</string>
+    <string name="plot_export">Plot export</string>
+    <string name="_2">λ (2)</string>
 </resources>
