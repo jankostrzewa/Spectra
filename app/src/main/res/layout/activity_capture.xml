@@ -40,43 +40,6 @@
         android:layout_marginBottom="0dp"
         ap:layout_constraintBottom_toTopOf="@+id/btnAnimatePlot" />
 
-    <EditText
-        android:id="@+id/inX2"
-        android:layout_width="65dp"
-        android:layout_height="42dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="99dp"
-        android:layout_marginTop="8dp"
-        android:maxLength="4"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        ap:layout_constraintHorizontal_bias="0.025"
-        ap:layout_constraintLeft_toRightOf="@+id/txtX2"
-        ap:layout_constraintRight_toRightOf="parent"
-        ap:layout_constraintTop_toBottomOf="@+id/inX1" />
-
-    <TextView
-        android:id="@+id/txtX2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/x_2"
-        android:textSize="18sp"
-        android:layout_marginTop="33dp"
-        ap:layout_constraintTop_toBottomOf="@+id/txtX1"
-        ap:layout_constraintLeft_toRightOf="@+id/inLambda2"
-        android:layout_marginLeft="7dp" />
-
-    <TextView
-        android:id="@+id/txtX1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/x_1"
-        android:textSize="18sp"
-        ap:layout_constraintLeft_toRightOf="@+id/inLambda1"
-        android:layout_marginLeft="7dp"
-        android:layout_marginTop="16dp"
-        ap:layout_constraintTop_toBottomOf="@+id/plot" />
-
     <com.serenegiant.widget.SimpleUVCCameraTextureView
         android:id="@+id/UVCCameraTextureView1"
         android:layout_width="410dp"
@@ -137,64 +100,6 @@
         ap:layout_constraintRight_toRightOf="parent"
         ap:layout_constraintHorizontal_bias="0.05" />
 
-    <EditText
-        android:id="@+id/inLambda2"
-        android:layout_width="65dp"
-        android:layout_height="45dp"
-        android:ems="10"
-        android:maxLength="3"
-        android:inputType="numberDecimal"
-        android:layout_marginTop="8dp"
-        ap:layout_constraintTop_toBottomOf="@+id/inLambda1"
-        ap:layout_constraintLeft_toRightOf="@+id/txtLambda2"
-        android:layout_marginLeft="8dp" />
-
-    <EditText
-        android:id="@+id/inLambda1"
-        android:layout_width="65dp"
-        android:layout_height="42dp"
-        android:layout_marginTop="8dp"
-        android:maxLength="3"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        ap:layout_constraintTop_toBottomOf="@+id/plot"
-        ap:layout_constraintLeft_toRightOf="@+id/txtLambda1"
-        android:layout_marginLeft="8dp" />
-
-    <EditText
-        android:id="@+id/inX1"
-        android:layout_width="65dp"
-        android:layout_height="42dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:maxLength="4"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        ap:layout_constraintLeft_toRightOf="@+id/txtX1"
-        ap:layout_constraintTop_toBottomOf="@+id/plot" />
-
-    <TextView
-        android:id="@+id/txtLambda1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/_1"
-        android:textSize="18sp"
-        android:layout_marginTop="16dp"
-        ap:layout_constraintTop_toBottomOf="@+id/plot"
-        android:layout_marginLeft="8dp"
-        ap:layout_constraintLeft_toLeftOf="parent" />
-
-    <TextView
-        android:id="@+id/txtLambda2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/_2"
-        android:textSize="18sp"
-        android:layout_marginLeft="8dp"
-        ap:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="33dp"
-        ap:layout_constraintTop_toBottomOf="@+id/txtLambda1" />
-
     <ToggleButton
         android:id="@+id/btnAnimatePlot"
         android:layout_width="wrap_content"
@@ -217,26 +122,13 @@
         ap:layout_constraintBottom_toTopOf="@+id/camera_button" />
 
     <Button
-        android:id="@+id/btnRecalculate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="1dp"
-        android:layout_marginRight="16dp"
-        android:onClick="recalculate"
-        android:text="@string/recalculate"
-        ap:layout_constraintBottom_toBottomOf="parent"
-        ap:layout_constraintRight_toRightOf="parent" />
-
-    <Button
         android:id="@+id/btnPlotExport"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:onClick="exportPlot"
         android:text="@string/plot_export"
-        ap:layout_constraintLeft_toRightOf="@+id/inX1"
         ap:layout_constraintRight_toRightOf="parent"
         ap:layout_constraintTop_toBottomOf="@+id/plot" />
 

@@ -61,13 +61,7 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
     private Bitmap tempBitmap;
     private LineAndPointFormatter series1Format;
     private XYSeries series1;
-
-    private EditText inLambda1;
-    private EditText inLambda2;
-    private EditText inX1;
-    private EditText inX2;
     private ToggleButton btnAnimatePlot;
-    private Button btnRecalculate;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -99,13 +93,8 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
         //plot.setDomainBoundaries(config.LAMBDAMIN,config.LAMBDAMAX,BoundaryMode.FIXED);
 
         /* Setting other elements */
-        inLambda1 = (EditText) findViewById(R.id.inLambda1);
-        inLambda2 = (EditText) findViewById(R.id.inLambda2);
-        inX1 = (EditText) findViewById(R.id.inX1);
-        inX2 = (EditText) findViewById(R.id.inX2);
         btnAnimatePlot = (ToggleButton) findViewById(R.id.btnAnimatePlot);
         btnAnimatePlot.setOnCheckedChangeListener(AnimatePlotListener);
-        btnRecalculate = (Button) findViewById(R.id.btnRecalculate);
     }
 
     @Override
@@ -348,40 +337,6 @@ public final class CaptureUsbActivity extends BaseActivity implements CameraDial
             }, 0);
         }
     };
-
-    public void recalculate(View view) {
-//        String sl1 = inLambda1.getText().toString();
-//        String sl2 = inLambda2.getText().toString();
-//        String sx1 = inX1.getText().toString();
-//        String sx2 = inX2.getText().toString();
-//
-//        int l1=350,l2=800,x1=1,x2=config.CAMERAWIDTH;
-//        if(!Objects.equals(sl1, "")){
-//            l1 = Integer.parseInt(sl1);
-//        }
-//        if(!Objects.equals(sl2, "")){
-//            l2 = Integer.parseInt(sl2);
-//        }
-//        if(!Objects.equals(sx1, "")){
-//            x1 = Integer.parseInt(sx1);
-//        }
-//        if(!Objects.equals(sx2, "")){
-//            x2 = Integer.parseInt(sx2);
-//        }
-//
-//        int deltaLambda = l2 - l1;
-//        int deltaX = x2 - x1;
-//        float step = deltaLambda / deltaX;
-//        int lambdamin = (int)(l1 - step * x1);
-//        int lambdamax = (int)(l2 + step * config.CAMERAWIDTH - x2);
-
-//        config.LAMBDAMIN = l1;
-//        config.LAMBDAMAX = l2;
-
-//        int xMin =
-
-       // plot.setDomainBoundaries(config.LAMBDAMIN,config.LAMBDAMAX,BoundaryMode.FIXED);
-    }
 
     public void exportPlot(View view) {
         int width = plot.getWidth();

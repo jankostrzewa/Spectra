@@ -37,9 +37,7 @@ class ImageAnalysis{
                 float[]hsv=new float[3];
                 Color.RGBToHSV(r,g,b,hsv);//Assign h,s,v from r,g,b to hsv[]
                 intensity += hsv[2];
-
             }
-            //Log.i("intensity:", String.valueOf(intensity));
             summedColumns[i] = intensity;
         }
         return summedColumns;
